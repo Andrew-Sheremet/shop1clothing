@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useEffect,useReducer } from 'react'
 import {
   onAuthStateChangedListener,
   createUserDocumentFromAuth,
@@ -9,9 +9,30 @@ const UserContext = createContext({
   setCurrentUser: () => null,
 })
 
+const userReducer = (state,action)=>{
+  switch (action.type) {
+    case 'SET_CURRENT_USER':
+    return{
+      ...state,
+      currentUser:action.payload
+    }
+  
+    default:
+      throw new Error(`pizda ${action.type}`)
+  }
+}
+
+const INITIAL_STATE ={
+  currentUser:null
+}
+
 export const UserProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null)
-  const value = { currentUser, setCurrentUser }
+const [state,dispatch]=useReducer(userReducer,INITIAL_STATE)
+const setCurrentUser=(user)=>{
+  dispatch({type:'SET_CURRENT_USER',payload:user})
+}
+
+  const value = { currentUser:state.currentUser, setCurrentUser }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener((user) => {
